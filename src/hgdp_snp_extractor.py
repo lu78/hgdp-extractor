@@ -52,14 +52,16 @@ def printGenotypes(markers_by_chr):
     
     for chrom in markers_by_chr:
         # add header
-        output = '\t' + str(markers_by_chr[chrom][0].individuals)
+        output = '\t' + ' '.join([ind.individual_id for ind in markers_by_chr[chrom][0].individuals]) + '\n'
         
         # add genotypes
         for marker in markers_by_chr[chrom]:
-            print marker.to_geno_format()
+            output += marker.to_geno_format() + '\n'
+            
 #            print marker.genotypes
 #            print marker.individuals
-             
+
+    print output
  
 
 def _test():
@@ -73,6 +75,7 @@ if __name__ == '__main__':
     
     basedir = '/home/gioby/Data/HGDP/'
     testgenotypefile = [basedir + 'Test/chr1_100.geno', ]
+    testgenotypefile = [basedir + 'Test/chr1_30.geno', ]
     
     samples = getFilteredGenotypes(samples_filter, testgenotypefile)
     printGenotypes(samples)
