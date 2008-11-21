@@ -36,6 +36,7 @@ def parameters():
 
 def getFilteredGenotypes(samples_filter, genotypes_files):
     # Read Genotypes File, filtering by population
+    markers_by_chr = {}
     for genotypesfilename in genotypes_files:
         try:
             genotypefile = file(genotypesfilename, 'r')
@@ -43,8 +44,23 @@ def getFilteredGenotypes(samples_filter, genotypes_files):
         except:
             raise ValueError("Could not open file %s" % genotypesfilename)
         
-        print hgdpgenotypesParser(genotypefile, samples_filter)
+        markers_by_chr[genotypesfilename] = hgdpgenotypesParser(genotypefile, samples_filter)
+    return markers_by_chr
 
+def printGenotypes(markers_by_chr):
+    output = ''
+    
+    for chrom in markers_by_chr:
+        # add header
+        output = '\t' + str(markers_by_chr[chrom][0].individuals)
+        
+        # add genotypes
+        for marker in markers_by_chr[chrom]:
+            print marker.to_geno_format()
+#            print marker.genotypes
+#            print marker.individuals
+             
+ 
 
 def _test():
     import doctest
@@ -58,5 +74,5 @@ if __name__ == '__main__':
     basedir = '/home/gioby/Data/HGDP/'
     testgenotypefile = [basedir + 'Test/chr1_100.geno', ]
     
-    getFilteredGenotypes(samples_filter, testgenotypefile)
-    
+    samples = getFilteredGenotypes(samples_filter, testgenotypefile)
+    printGenotypes(samples)
