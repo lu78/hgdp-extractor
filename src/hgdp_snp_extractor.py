@@ -17,22 +17,59 @@ from PopGen.Gio.HgdpIO import hgdpgenotypesParser, hgdpsamplesfileParser
 from pprint import pprint, pformat
 import logging
 import os
+import getopt
+import sys
+
+def usage():
+    """ """
+    print __doc__
+    sys.exit()
 
 def parameters():
+    # Read arguments and parameters
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], 
+                                   "ht", ["help", "test", "samplefile=", "genotypes_by_chr_dir=",
+                                          "chromosomes=", "continent=", "outputfile="])
+
+    except getopt.GetoptError, err:
+        usage()
+
+    if opts == []:
+        usage()
+
+    for opt, arg in opts:
+        if opt in ('-h', '--help'):
+            usage()
+        elif opt in ('--test', '-t'):
+            _test()
+        elif opt in ('--samplesfile', '-s'):
+            samplesfile = arg
+        elif opt in ('--window', '-w'):
+            sliding_windows_file_path = arg
+        elif opt in ('--output', '-o'):
+            output_file_path = arg
+        
+
+    # TODO: getopt interface
+    
     basedir = '/home/gioby/Data/HGDP/'
     samplesfile = file(basedir + 'Annotations/samples_subset.csv', 'r')
     genotypes_by_chr_dir = basedir + 'Genotypes_by_chr/'
-    selected_chr = [22,]
+    selected_chr = [22, ]
     genotypes_files = [genotypes_by_chr_dir + '/chr' + str(chrom) + '.geno' 
                        for chrom in selected_chr]
     logging.debug(genotypes_files)
-    continent = 'Europe'
+    continent = 'Subsaharian Africa'
+    continent = 'Europe'        # TODO: fix!!
+#    continent = 'Asia'
+    outputfile = basedir + 'Results/hgdp_chr22_' + continent + '.geno'
     
     # Read Samples File
     samples = hgdpsamplesfileParser(samplesfile)
     samples_filter = [sample for sample in samples if sample.continent == continent]
     
-    return samples_filter, genotypes_files 
+    return samples_filter, genotypes_files, outputfile
 
 def getFilteredGenotypes(samples_filter, genotypes_files):
     # Read Genotypes File, filtering by population
@@ -47,7 +84,7 @@ def getFilteredGenotypes(samples_filter, genotypes_files):
         markers_by_chr[genotypesfilename] = hgdpgenotypesParser(genotypefile, samples_filter)
     return markers_by_chr
 
-def printGenotypes(markers_by_chr):
+def printGenotypes(markers_by_chr, outputfile):
     output = ''
     
     for chrom in markers_by_chr:
@@ -62,6 +99,9 @@ def printGenotypes(markers_by_chr):
 #            print marker.individuals
 
     print output
+    out = file(outputfile, 'w')
+    out.write(output)
+    out.close()
  
 
 def _test():
@@ -70,12 +110,17 @@ def _test():
     
 if __name__ == '__main__':
 #    logging.basicConfig(level = logging.DEBUG)
-    [samples_filter, genotypes_files] = parameters()
+    [samples_filter, genotypes_files, outputfile] = parameters()
     logging.debug(pformat(samples_filter)) 
+#    print outputfile
+    test = 0
     
-    basedir = '/home/gioby/Data/HGDP/'
-    testgenotypefile = [basedir + 'Test/chr1_100.geno', ]
-    testgenotypefile = [basedir + 'Test/chr1_30.geno', ]
+    if test:
+        basedir = '/home/gioby/Data/HGDP/'
+        #    testgenotypefile = [basedir + 'Test/chr1_100.geno', ]
+        testgenotypefile = [basedir + 'Test/chr1_30.geno', ]
     
-    samples = getFilteredGenotypes(samples_filter, testgenotypefile)
-    printGenotypes(samples)
+        samples = getFilteredGenotypes(samples_filter, testgenotypefile)
+    else:
+        samples = getFilteredGenotypes(samples_filter, genotypes_files)
+    printGenotypes(samples, outputfile)
