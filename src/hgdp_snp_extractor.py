@@ -18,6 +18,7 @@ from pprint import pprint, pformat
 import logging
 import os
 import getopt
+from optparse import OptionParser
 import sys
 
 def usage():
@@ -37,6 +38,11 @@ def parameters():
 
     if opts == []:
         usage()
+        
+    samplesfile = ''
+    genotypes_by_chr_dir = ''
+    selected_chr = []
+    continent = ''
 
     for opt, arg in opts:
         if opt in ('-h', '--help'):
@@ -52,16 +58,19 @@ def parameters():
         
 
     # TODO: getopt interface
-    
     basedir = '/home/gioby/Data/HGDP/'
-    samplesfile = file(basedir + 'Annotations/samples_subset.csv', 'r')
-    genotypes_by_chr_dir = basedir + 'Genotypes_by_chr/'
-    selected_chr = [22, ]
+    if samplesfile == '':    
+        samplesfile = file(basedir + 'Annotations/samples_subset.csv', 'r')
+    if genotypes_by_chr_dir == '':
+        genotypes_by_chr_dir = basedir + 'Genotypes_by_chr/'
+    if selected_chr == []:
+        selected_chr = [22, ]
+    if continent == '':
+        continent = 'Europe'
+        
     genotypes_files = [genotypes_by_chr_dir + '/chr' + str(chrom) + '.geno' 
                        for chrom in selected_chr]
     logging.debug(genotypes_files)
-    continent = 'Subsaharian Africa'
-    continent = 'Europe'        # TODO: fix!!
 #    continent = 'Asia'
     outputfile = basedir + 'Results/hgdp_chr22_' + continent + '.geno'
     
