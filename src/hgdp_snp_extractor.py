@@ -29,14 +29,21 @@ def usage():
     print __doc__
     sys.exit()
 
-def parameters():
-    """Read arguments and parameters"""
+def get_parameters():
+    """Read arguments and parameters
+    
+    returns:
+    - samples file path
+    - filter on samples file (individuals to be filtered)
+    - filter on continent
+    - filter on chromosome
+    - output file path 
+    """
     
     basedir = '/home/gioby/Data/HGDP/'
     
     # parse parameters
     parser = OptionParser()
-    
     
     parser.set_defaults(genotypes_by_chr_dir = basedir + 'Genotypes_by_chr/',
                         samplesfilepath = basedir + 'Annotations/samples_subset.csv',
@@ -59,22 +66,23 @@ def parameters():
     
     (options, args) = parser.parse_args()
 
-    samplesfile = file(options.samplesfilepath, 'r')
     genotypes_files = [options.genotypes_by_chr_dir + '/chr' + str(chrom) + '.geno' 
                        for chrom in options.selected_chr]
     logging.debug(options.genotypes_files)
-#    continent = 'Asia'
-    outputfile = basedir + 'Results/hgdp_chr%s_%s.geno' %(options.chromosomes[0], 
+
+    outputfile = basedir + 'Results/hgdp_chr%s_%s.geno' %(options.chromosomes, 
                                                           options.continent)
     
     # Read Samples File
     samples = hgdpsamplesfileParser(samplesfile)
     samples_filter = [sample for sample in samples if sample.continent == options.continent]
     
-    return samples_filter, genotypes_files, outputfile
+    return option.samplesfilepath, genotypes_files, outputfile
+#    return samples_filter, genotypes_files, outputfile
 
 def getFilteredGenotypes(samples_filter, genotypes_files):
-    # Read Genotypes File, filtering by population
+    """Read Genotypes File, filtering by population"""
+
     markers_by_chr = {}
     for genotypesfilename in genotypes_files:
         try:
@@ -110,22 +118,27 @@ def printGenotypes(markers_by_chr, outputfile):
  
 
 def test_all():
+    """
+    use nose to run tests.
+    """
+    logging.basicConfig(level = logging.DEBUG)
     import doctest
     doctest.testmod()
-    
-if __name__ == '__main__':
-#    logging.basicConfig(level = logging.DEBUG)
-    [samples_filter, genotypes_files, outputfile] = parameters()
+
+    basedir = '/home/gioby/Data/HGDP/'
+#    testgenotypefile = [basedir + 'Test/chr1_100.geno', ]
+    testgenotypefile = [basedir + 'Test/chr1_30.geno', ]
+
+    [samples_filter, genotypes_files, outputfile] = get_parameters()
+
+    samplesfile = file(options.samplesfilepath, 'r')
     logging.debug(pformat(samples_filter)) 
-#    print outputfile
-    test = 0
-    
-    if test:
-        basedir = '/home/gioby/Data/HGDP/'
-        #    testgenotypefile = [basedir + 'Test/chr1_100.geno', ]
-        testgenotypefile = [basedir + 'Test/chr1_30.geno', ]
-    
-        samples = getFilteredGenotypes(samples_filter, testgenotypefile)
-    else:
-        samples = getFilteredGenotypes(samples_filter, genotypes_files)
+
+    samples = getFilteredGenotypes(samples_filter, testgenotypefile)
+    samples = getFilteredGenotypes(samples_filter, genotypes_files)
+
     printGenotypes(samples, outputfile)
+     
+#if __name__ == '__main__':
+#    print outputfile
+    
