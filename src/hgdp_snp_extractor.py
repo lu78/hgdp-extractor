@@ -137,20 +137,19 @@ def test_europe_extract(*args):
 
 #    [samplesfilter, genotypes_files, outputfile] = get_parameters() TODO: don't call get_parameters twice
     continent = 'Europe'
-    samplesfilepath = '/home/gioby/Data/HGDP/Annotations/samples_subset.csv'
+    samplesfilepath = basedir + '/Annotations/samples_subset.csv'
 
     samples_filter =  get_samples_list(samplesfilepath, continent)
     
     samples = getFilteredGenotypes(samples_filter, testgenotypefile)
+    outputfile = basedir + 'Results/test.europe' 
 
 #    logging.debug(pformat(samples_filter)) 
 
-def hug():
-
-    samples = getFilteredGenotypes(samples_filter, genotypes_files)
 
     printGenotypes(samples, outputfile)
      
 if __name__ == '__main__':
     get_parameters()
+    samples = getFilteredGenotypes(samples_filter, genotypes_files)
     
