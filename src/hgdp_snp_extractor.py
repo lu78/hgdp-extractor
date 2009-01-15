@@ -3,6 +3,9 @@
 """
 Extract SNPs from a HGDP SNP file.     #TODO: refactore everything!! 
 
+To parse the files, it uses the libraries on Gio.HGDP from the experimental
+biopython popgen module. 
+
 usage:
     python hgdp_snp_extractor.py 
             [--samplesfile '/home/gioby/Data/HGDP/Annotations/samples_subset.csv']
@@ -46,17 +49,15 @@ def parameters():
                       type='string', dest = 'genotypes_by_chr_dir')
     parser.add_option('-c', '--continent', action='store', type='string', 
                       dest = 'continent')
-    parser.add_option('-y', '--chromosomes', action='store', type='list', 
-                      dest = 'chromosomes')
+    parser.add_option('-y', '--chromosomes', action='store', type='string', 
+                      dest = 'chromosomes')     # FIXME: convert to list
     parser.add_option('-o', '--outputfile', action='store', type='string', 
                       dest = 'outputfile')
-    parser.add_option('-t', '--test', action='callback', dest = _test)
-    parser.add_option('-h', '--help', action='help')
+    parser.add_option('-t', '--test', action='callback', callback=test_all)
+#    parser.add_option('-h', '--help', action='callback', callback=test_all)
     
     
     (options, args) = parser.parse_args()
-#    if len(args) != 1:
-#        parser.error("incorrect number of arguments")        
 
     samplesfile = file(options.samplesfilepath, 'r')
     genotypes_files = [options.genotypes_by_chr_dir + '/chr' + str(chrom) + '.geno' 
@@ -86,6 +87,9 @@ def getFilteredGenotypes(samples_filter, genotypes_files):
     return markers_by_chr
 
 def printGenotypes(markers_by_chr, outputfile):
+    """
+    print the genotypes to an output file
+    """
     output = ''
     
     for chrom in markers_by_chr:
@@ -105,7 +109,7 @@ def printGenotypes(markers_by_chr, outputfile):
     out.close()
  
 
-def _test():
+def test_all():
     import doctest
     doctest.testmod()
     
