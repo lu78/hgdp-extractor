@@ -33,10 +33,9 @@ def get_parameters():
     """Read arguments and parameters
     
     returns:
-    - samples file path
-    - filter on samples file (individuals to be filtered)
-    - filter on continent
-    - filter on chromosome
+    - samples_filter -> a list of individuals id to be filtered 
+            (belonging to the same continent)
+    - genotypes_file path
     - output file path 
     """
     
@@ -60,7 +59,7 @@ def get_parameters():
                       dest = 'chromosomes')     # FIXME: convert to list
     parser.add_option('-o', '--outputfile', action='store', type='string', 
                       dest = 'outputfile')
-    parser.add_option('-t', '--test', action='callback', callback=test_parser)
+    parser.add_option('-t', '--test', action='callback', callback=test_europe_extract, nargs=0)
     
     (options, args) = parser.parse_args()
 
@@ -74,15 +73,14 @@ def get_parameters():
     samples_filter = get_samples_list(options.samplesfilepath, options.continent)
     return samples_filter, genotypes_files, outputfile
 
-
 def get_samples_list(samplesfilepath, continent):
     """Read Samples File and take the IDs of the samples to be filtered 
     (actually it filters by continent)
     """
     samplesfile = open(samplesfilepath, 'r')
     samples = hgdpsamplesfileParser(samplesfile)
-    samples_filter = [sample for sample in samples if sample.continent == options.continent]
-    return samples_list
+    samples_filter = [sample for sample in samples if sample.continent == continent]
+    return samples_filter
     
 #    return samples_filter, genotypes_files, outputfile
 
@@ -123,11 +121,12 @@ def printGenotypes(markers_by_chr, outputfile):
     out.close()
  
 
-def test_parser(*args):
+def test_europe_extract(*args):
     """
     use nose to run tests.
     """
-    print 'args ', args
+#    print 'args ', args
+
 #    logging.basicConfig(level = logging.DEBUG)
     import doctest
     doctest.testmod()
@@ -136,11 +135,18 @@ def test_parser(*args):
 #    testgenotypefile = [basedir + 'Test/chr1_100.geno', ]
     testgenotypefile = [basedir + 'Test/chr1_30.geno', ]
 
-    [samplesfilter, genotypes_files, outputfile] = get_parameters()
+#    [samplesfilter, genotypes_files, outputfile] = get_parameters() TODO: don't call get_parameters twice
+    continent = 'Europe'
+    samplesfilepath = '/home/gioby/Data/HGDP/Annotations/samples_subset.csv'
 
-    logging.debug(pformat(samples_filter)) 
-
+    samples_filter =  get_samples_list(samplesfilepath, continent)
+    
     samples = getFilteredGenotypes(samples_filter, testgenotypefile)
+
+#    logging.debug(pformat(samples_filter)) 
+
+def hug():
+
     samples = getFilteredGenotypes(samples_filter, genotypes_files)
 
     printGenotypes(samples, outputfile)
