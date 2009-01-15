@@ -60,24 +60,30 @@ def get_parameters():
                       dest = 'chromosomes')     # FIXME: convert to list
     parser.add_option('-o', '--outputfile', action='store', type='string', 
                       dest = 'outputfile')
-    parser.add_option('-t', '--test', action='callback', callback=test_all)
-#    parser.add_option('-h', '--help', action='callback', callback=test_all)
-    
+    parser.add_option('-t', '--test', action='callback', callback=test_parser)
     
     (options, args) = parser.parse_args()
 
     genotypes_files = [options.genotypes_by_chr_dir + '/chr' + str(chrom) + '.geno' 
                        for chrom in options.selected_chr]
-    logging.debug(options.genotypes_files)
+#    logging.debug(options.genotypes_files)
 
     outputfile = basedir + 'Results/hgdp_chr%s_%s.geno' %(options.chromosomes, 
                                                           options.continent)
-    
-    # Read Samples File
+
+    samples_filter = get_samples_list(options.samplesfilepath, options.continent)
+    return samples_filter, genotypes_files, outputfile
+
+
+def get_samples_list(samplesfilepath, continent):
+    """Read Samples File and take the IDs of the samples to be filtered 
+    (actually it filters by continent)
+    """
+    samplesfile = open(samplesfilepath, 'r')
     samples = hgdpsamplesfileParser(samplesfile)
     samples_filter = [sample for sample in samples if sample.continent == options.continent]
+    return samples_list
     
-    return option.samplesfilepath, genotypes_files, outputfile
 #    return samples_filter, genotypes_files, outputfile
 
 def getFilteredGenotypes(samples_filter, genotypes_files):
@@ -117,11 +123,12 @@ def printGenotypes(markers_by_chr, outputfile):
     out.close()
  
 
-def test_all():
+def test_parser(*args):
     """
     use nose to run tests.
     """
-    logging.basicConfig(level = logging.DEBUG)
+    print 'args ', args
+#    logging.basicConfig(level = logging.DEBUG)
     import doctest
     doctest.testmod()
 
@@ -129,9 +136,8 @@ def test_all():
 #    testgenotypefile = [basedir + 'Test/chr1_100.geno', ]
     testgenotypefile = [basedir + 'Test/chr1_30.geno', ]
 
-    [samples_filter, genotypes_files, outputfile] = get_parameters()
+    [samplesfilter, genotypes_files, outputfile] = get_parameters()
 
-    samplesfile = file(options.samplesfilepath, 'r')
     logging.debug(pformat(samples_filter)) 
 
     samples = getFilteredGenotypes(samples_filter, testgenotypefile)
@@ -139,6 +145,6 @@ def test_all():
 
     printGenotypes(samples, outputfile)
      
-#if __name__ == '__main__':
-#    print outputfile
+if __name__ == '__main__':
+    get_parameters()
     
