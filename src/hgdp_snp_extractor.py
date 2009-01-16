@@ -32,7 +32,14 @@ def usage():
 def get_parameters():
     """Read arguments and parameters
     
-    returns:
+    input:
+    - [samplesfile] -> description of sample file
+    - [genotypes_by_chr_dir]
+    - chromosomes   [22]
+    - continent     [Europe]
+    - [outputfile]
+
+    output:
     - samples_filter -> a list of individuals id to be filtered 
             (belonging to the same continent)
     - genotypes_file path
@@ -145,7 +152,6 @@ def test_europe_extract(*args):
     outputfile = basedir + 'Results/test.europe' 
 
 #    logging.debug(pformat(samples_filter)) 
-
 
     printGenotypes(samples, outputfile)
      
