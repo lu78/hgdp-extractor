@@ -123,7 +123,7 @@ def printGenotypes(markers_by_chr, outputfile):
 #            print marker.genotypes
 #            print marker.individuals
 
-    logging.debud(output)
+    logging.debug(output)
     out = file(outputfile, 'w')
     out.write(output)
     out.close()
