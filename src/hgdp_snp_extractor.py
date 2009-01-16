@@ -86,7 +86,8 @@ def get_samples_list(samplesfilepath, continent):
     """
     samplesfile = open(samplesfilepath, 'r')
     samples = hgdpsamplesfileParser(samplesfile)
-    samples_filter = [sample for sample in samples if sample.continent == continent]
+    samples_filter = [sample.individual_id for sample in samples if sample.continent == continent]
+    print samples_filter
     return samples_filter
     
 #    return samples_filter, genotypes_files, outputfile
@@ -113,7 +114,7 @@ def printGenotypes(markers_by_chr, outputfile):
     
     for chrom in markers_by_chr:
         # add header
-        output = '\t' + ' '.join([ind.individual_id for ind in markers_by_chr[chrom][0].individuals]) + '\n'
+        output = '\t' + ' '.join([ind for ind in markers_by_chr[chrom][0].individuals]) + '\n'
         
         # add genotypes
         for marker in markers_by_chr[chrom]:
@@ -122,15 +123,17 @@ def printGenotypes(markers_by_chr, outputfile):
 #            print marker.genotypes
 #            print marker.individuals
 
-    print output
+    logging.debud(output)
     out = file(outputfile, 'w')
     out.write(output)
     out.close()
+    print 'saved to ', outputfile
  
 
 def test_europe_extract(*args):
-    """
-    use nose to run tests.
+    """Test the extraction of European individuals om Chromosome 1 from a sample file
+
+    Note: use nose to run tests.
     """
 #    print 'args ', args
 
@@ -156,6 +159,8 @@ def test_europe_extract(*args):
     printGenotypes(samples, outputfile)
      
 if __name__ == '__main__':
-    get_parameters()
+    [samples_filter, genotypes_files, outputfile] = get_parameters()
+
     samples = getFilteredGenotypes(samples_filter, genotypes_files)
+    printGenotypes(samples, outputfile)
     
