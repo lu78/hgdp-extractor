@@ -11,7 +11,7 @@ usage:
             [--samplesfile '/home/gioby/Data/HGDP/Annotations/samples_subset.csv']
             [--genotypes_by_chr_dir  /home/gioby/Data/HGDP/Genotypes_by_chr/]
             --chromosomes 22    [default 22]
-            --continents European    [default European]
+            --continents Europe    [default Europe]
             [--outputfile /home/gioby/Data/HGDP/Results/european_chr22.geno]
             
 """
