@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import unittest
 import commands
 import difflib
@@ -15,6 +17,8 @@ class base_hgdpextractor(unittest.TestCase):
     
      """
     # The following variables should be common for all the tests:
+    _command_executed = False
+    logging.basicConfig(level = logging.DEBUG)
     basedir = '/home/gioby/Data/HGDP/'
     samplesfile = basedir + 'Annotations/samples_subset.csv'
     genotypes_by_chr_dir = basedir + 'Genotypes_by_chr/'
@@ -26,19 +30,27 @@ class base_hgdpextractor(unittest.TestCase):
     expected_outputfile = ''
     output = datetime.now()
     
-    # TODO: move call to commands.getoutput here? How to create global fixtures?
-    # maybe it is better to use a flag (command._isset or similar)
+    def _launch_python_command(self, command):
+        """
+        This function substitute an hypothetical setUpAll method 
+        (if only unittest supported this)
 
+        If this is the first test ran, run the python command; otherwise, pass
+        """
+        output = commands.getoutput(self.python_command)
+        self._command_executed = 1
+        logging.debug('command executed:\n%s' % self.python_command)
+        return output
 
     def setUp(self):
         """
         launch the python script hgdp_snp_extractor
         """
-        python_command = 'python hgdp_snp_extractor -c %s -y %s -g %s -o %s' % (self.continent, 
+        self.python_command = 'python hgdp_snp_extractor.py -c %s -y %s -g %s -o %s' % (self.continent, 
                                                 self.chromosome, self.genotypes_by_chr_dir,
                                                 self.outputfile)
-        logging.basicConfig(level = logging.DEBUG)
-        self.output = commands.getoutput('python')
+        if not self._command_executed:
+            self.output = self._launch_python_command(self.python_command)
         logging.debug(self.output)
 
     def test_outputfile_is_expected(self):
