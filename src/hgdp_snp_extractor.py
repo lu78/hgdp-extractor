@@ -10,7 +10,7 @@ usage:
     python hgdp_snp_extractor.py 
             [--samplesfile '/home/gioby/Data/HGDP/Annotations/samples_subset.csv']
             [--genotypes_by_chr_dir  /home/gioby/Data/HGDP/Genotypes_by_chr/]
-            --chromosomes 22    [default 22]
+            --chromosome 22    [default 22]
             --continents Europe    [default Europe]
             [--outputfile /home/gioby/Data/HGDP/Results/european_chr22.geno]
             
@@ -53,7 +53,7 @@ def get_parameters():
     
     parser.set_defaults(genotypes_by_chr_dir = basedir + 'Genotypes_by_chr/',
                         samplesfilepath = basedir + 'Annotations/samples_subset.csv',
-                        selected_chr = [22, ],  #FIXME: only the first chromosome is used 
+                        selected_chr = 22,  # only a chromosome per run
                         continent = 'Europe')
     
     parser.add_option('-s', '--samplefile', action='store', type='string', 
@@ -70,9 +70,9 @@ def get_parameters():
     
     (options, args) = parser.parse_args()
 
-    genotypes_files = [options.genotypes_by_chr_dir + '/chr' + str(chrom) + '.geno' 
-                       for chrom in options.selected_chr]
-#    logging.debug(options.genotypes_files)
+    genotypes_files = [options.genotypes_by_chr_dir + '/chr' + str(chrom) + '.geno'] 
+                       
+    logging.debug(options.genotypes_files)
 
     outputfile = basedir + 'Results/hgdp_chr%s_%s.geno' %(options.chromosomes, 
                                                           options.continent)
@@ -92,19 +92,16 @@ def get_samples_list(samplesfilepath, continent):
     
 #    return samples_filter, genotypes_files, outputfile
 
-def getFilteredGenotypes(samples_filter, genotypes_files):
-    """Read Genotypes File, filtering by population"""
+def getFilteredGenotypes(samples_filter, genotypesfilename):
+    """Read a Genotypes File and selects all the genotypes belonging to a population
+    
+    """
 
-    markers_by_chr = {}
-    for genotypesfilename in genotypes_files:
-        try:
-            genotypefile = file(genotypesfilename, 'r')
-            logging.debug(genotypefile)
-        except:
-            raise ValueError("Could not open file %s" % genotypesfilename)
-        
-        markers_by_chr[genotypesfilename] = hgdpgenotypesParser(genotypefile, samples_filter)
-    return markers_by_chr
+    genotypefile = file(genotypesfilename, 'r')
+    logging.debug(genotypefile)
+    
+    markers = hgdpgenotypesParser(genotypefile, samples_filter)
+    return markers
 
 def printGenotypes(markers_by_chr, outputfile):
     """
@@ -112,14 +109,13 @@ def printGenotypes(markers_by_chr, outputfile):
     """
     output = ''
     
-    for chrom in markers_by_chr:
-        # add header
-        output = '\t' + ' '.join([ind for ind in markers_by_chr[chrom][0].individuals]) + '\n'
+    # add header
+    output = '\t' + ' '.join([ind for ind in markers_by_chr[chrom][0].individuals]) + '\n'
+    
+    # add genotypes
+    for marker in markers_by_chr[chrom]:
+        output += marker.to_geno_format() + '\n'
         
-        # add genotypes
-        for marker in markers_by_chr[chrom]:
-            output += marker.to_geno_format() + '\n'
-            
 #            print marker.genotypes
 #            print marker.individuals
 
@@ -131,7 +127,7 @@ def printGenotypes(markers_by_chr, outputfile):
  
 
 def test_europe_extract(*args):
-    """Test the extraction of European individuals om Chromosome 1 from a sample file
+    """Test the extraction of European individuals on Chromosome 22 from a sample file
 
     Note: use nose to run tests.
     """
@@ -142,8 +138,8 @@ def test_europe_extract(*args):
     doctest.testmod()
 
     basedir = '/home/gioby/Data/HGDP/'
-#    testgenotypefile = [basedir + 'Test/chr1_100.geno', ]
-    testgenotypefile = [basedir + 'Test/chr1_30.geno', ]
+#    testgenotypefile = [basedir + 'Test/chr22_100.geno', ]
+    testgenotypefile = basedir + 'Test/chr22_30.geno'
 
 #    [samplesfilter, genotypes_files, outputfile] = get_parameters() TODO: don't call get_parameters twice
     continent = 'Europe'
@@ -159,6 +155,7 @@ def test_europe_extract(*args):
     printGenotypes(samples, outputfile)
      
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
     [samples_filter, genotypes_files, outputfile] = get_parameters()
 
     samples = getFilteredGenotypes(samples_filter, genotypes_files)
