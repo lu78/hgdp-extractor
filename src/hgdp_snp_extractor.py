@@ -77,6 +77,7 @@ def get_parameters():
     outputfile = basedir + 'Results/hgdp_chr%s_%s.geno' %(options.chrom, 
                                                           options.continent)
 
+    # get a list of individuals (samples) belonging to the continent
     samples_filter = get_samples_list(options.samplesfilepath, options.continent)
     return samples_filter, genotypesfile, outputfile
 
@@ -97,9 +98,8 @@ def getFilteredGenotypes(samples_filter, genotypesfilename):
     
     """
 
-    genotypefile = file(genotypesfilename, 'r')
+    genotypefile = open(genotypesfilename, 'r')
     logging.debug(genotypefile)
-    
     markers = hgdpgenotypesParser(genotypefile, samples_filter)
     return markers
 
@@ -111,6 +111,8 @@ def printGenotypes(markers, outputfile):
     
     # add header
     output = '\t' + ' '.join([ind.name for ind in markers]) + '\n'
+    logging.debug('Markers:')
+    logging.debug(markers)
     
     # add genotypes
     for marker in markers:
@@ -120,7 +122,7 @@ def printGenotypes(markers, outputfile):
 #            print marker.individuals
 
     logging.debug(output)
-    out = file(outputfile, 'w')
+    out = open(outputfile, 'w')
     out.write(output)
     out.close()
     print 'saved to ', outputfile
@@ -156,9 +158,10 @@ def test_europe_extract(*args):
     sys.exit()
      
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.DEBUG, format="%(funcName)s - %(lineno)d - %(message)s")
     [samples_filter, genotypes_files, outputfile] = get_parameters()
 
     samples = getFilteredGenotypes(samples_filter, genotypes_files)
+    logging.debug(samples)
     printGenotypes(samples, outputfile)
     
