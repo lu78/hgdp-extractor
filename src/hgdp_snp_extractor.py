@@ -63,22 +63,22 @@ def get_parameters():
     parser.add_option('-c', '--continent', action='store', type='string', 
                       dest = 'continent')
     parser.add_option('-y', '--chromosomes', action='store', type='string', 
-                      dest = 'chromosomes')     # FIXME: convert to list
+                      dest = 'chrom', default='22')
     parser.add_option('-o', '--outputfile', action='store', type='string', 
                       dest = 'outputfile')
     parser.add_option('-t', '--test', action='callback', callback=test_europe_extract, nargs=0)
     
     (options, args) = parser.parse_args()
 
-    genotypes_files = [options.genotypes_by_chr_dir + '/chr' + str(chrom) + '.geno'] 
+    genotypesfile = options.genotypes_by_chr_dir + '/chr' + options.chrom + '.geno' 
                        
-    logging.debug(options.genotypes_files)
+    logging.debug(genotypesfile)
 
-    outputfile = basedir + 'Results/hgdp_chr%s_%s.geno' %(options.chromosomes, 
+    outputfile = basedir + 'Results/hgdp_chr%s_%s.geno' %(options.chrom, 
                                                           options.continent)
 
     samples_filter = get_samples_list(options.samplesfilepath, options.continent)
-    return samples_filter, genotypes_files, outputfile
+    return samples_filter, genotypesfile, outputfile
 
 def get_samples_list(samplesfilepath, continent):
     """Read Samples File and take the IDs of the samples to be filtered 
@@ -103,17 +103,17 @@ def getFilteredGenotypes(samples_filter, genotypesfilename):
     markers = hgdpgenotypesParser(genotypefile, samples_filter)
     return markers
 
-def printGenotypes(markers_by_chr, outputfile):
+def printGenotypes(markers, outputfile):
     """
     print the genotypes to an output file
     """
     output = ''
     
     # add header
-    output = '\t' + ' '.join([ind for ind in markers_by_chr[chrom][0].individuals]) + '\n'
+    output = '\t' + ' '.join([ind.name for ind in markers]) + '\n'
     
     # add genotypes
-    for marker in markers_by_chr[chrom]:
+    for marker in markers:
         output += marker.to_geno_format() + '\n'
         
 #            print marker.genotypes
@@ -127,7 +127,7 @@ def printGenotypes(markers_by_chr, outputfile):
  
 
 def test_europe_extract(*args):
-    """Test the extraction of European individuals on Chromosome 22 from a sample file
+    """Test the extraction of European individuals on Chromosome 1 from a sample file
 
     Note: use nose to run tests.
     """
@@ -139,7 +139,7 @@ def test_europe_extract(*args):
 
     basedir = '/home/gioby/Data/HGDP/'
 #    testgenotypefile = [basedir + 'Test/chr22_100.geno', ]
-    testgenotypefile = basedir + 'Test/chr22_30.geno'
+    testgenotypefile = basedir + 'Test/chr1_30.geno'
 
 #    [samplesfilter, genotypes_files, outputfile] = get_parameters() TODO: don't call get_parameters twice
     continent = 'Europe'
@@ -153,6 +153,7 @@ def test_europe_extract(*args):
 #    logging.debug(pformat(samples_filter)) 
 
     printGenotypes(samples, outputfile)
+    sys.exit()
      
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
