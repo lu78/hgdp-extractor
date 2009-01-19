@@ -78,10 +78,10 @@ def get_parameters():
                                                           options.continent)
 
     # get a list of individuals (samples) belonging to the continent
-    samples_filter = get_samples_list(options.samplesfilepath, options.continent)
+    samples_filter = filter_samples_by_continent(options.samplesfilepath, options.continent)
     return samples_filter, genotypesfile, outputfile
 
-def get_samples_list(samplesfilepath, continent):
+def filter_samples_by_continent(samplesfilepath, continent):
     """Read Samples File and take the IDs of the samples to be filtered 
     (actually it filters by continent)
     """
@@ -146,7 +146,7 @@ def test_europe_extract(*args):
     continent = 'Europe'
     samplesfilepath = basedir + '/Annotations/samples_subset.csv'
 
-    samples_filter =  get_samples_list(samplesfilepath, continent)
+    samples_filter = filter_samples_by_continent(samplesfilepath, continent)
     
     samples = getFilteredGenotypes(samples_filter, testgenotypefile)
     outputfile = basedir + 'Results/test.europe' 
