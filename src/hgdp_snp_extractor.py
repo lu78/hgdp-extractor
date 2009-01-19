@@ -110,8 +110,7 @@ def printGenotypes(markers, outputfile):
     output = ''
     
     # add header
-    output = '\t' + ' '.join([ind.name for ind in markers]) + '\n'
-    logging.debug('Markers:')
+    output = '\t' + ' '.join([marker for marker in markers[0].individuals]) + '\n'
     logging.debug(markers)
     
     # add genotypes
